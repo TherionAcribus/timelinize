@@ -208,7 +208,8 @@ func decodeGPX(r io.Reader) (*gpxFile, error) {
 }
 
 func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
-	ts := parseTime(w.Time)
+	placedTs := parseTime(w.Time)
+	ts := placedTs
 
 	location := timeline.Location{
 		Latitude:  &w.Lat,
@@ -270,10 +271,9 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 	if c.LongDesc.Text != "" {
 		meta["Long description"] = c.LongDesc.Text
 	}
-	if c.Hints != "" {
-		meta["Hint"] = c.Hints
+	if c.Attributes != nil {
+		meta["AttributesRaw"] = c.Attributes
 	}
-
 	if len(c.Attributes) > 0 {
 		attrs := make([]string, 0, len(c.Attributes))
 		for _, a := range c.Attributes {
@@ -298,11 +298,18 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 			if latestLog == nil || parseTime(l.Date).After(parseTime(latestLog.Date)) {
 				latestLog = l
 			}
-			if ts.IsZero() {
-				ts = parseTime(l.Date)
-			}
 		}
 		meta["Logs"] = logs
+	}
+
+	// Prefer the log date (found date) as the item timestamp; keep placed date in metadata.
+	if latestLog != nil {
+		if logTs := parseTime(latestLog.Date); !logTs.IsZero() {
+			ts = logTs
+		}
+	}
+	if !placedTs.IsZero() {
+		meta["Cache placed date"] = placedTs
 	}
 
 	// Choose visible content
