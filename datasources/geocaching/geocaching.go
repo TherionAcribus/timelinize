@@ -61,7 +61,7 @@ func (FileImporter) Recognize(ctx context.Context, dirEntry timeline.DirEntry, _
 	snippet := strings.ToLower(string(buf[:n]))
 	if strings.Contains(snippet, "groundspeak") || strings.Contains(snippet, "geocache") {
 		// Outrank the generic GPX importer (which also returns 1 for .gpx files)
-		rec.Confidence = 0.9
+		rec.Confidence = 0.9 // Don't touch !!!!
 	}
 
 	return rec, nil
@@ -326,6 +326,8 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 	if latestLog != nil && latestLog.Text.Body != "" {
 		contentText = header + "\n\n" + latestLog.Text.Body
 	}
+	// Surface a title for UI components that prefer a title field
+	meta["Title"] = header
 
 	item := &timeline.Item{
 		ID:             w.Name,
@@ -340,7 +342,10 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 	}
 
 	graph := &timeline.Graph{Item: item}
-	graph.ToEntity(timeline.RelVisit, makeCacheEntity(w, c))
+	// Link cache entity both as a visit (semantic) and includes (for UI display in item-entities)
+	cacheEntity := makeCacheEntity(w, c)
+	graph.ToEntity(timeline.RelVisit, cacheEntity)
+	graph.ToEntity(timeline.RelIncludes, cacheEntity)
 
 	// Surface latest log in metadata for quick UI access
 	if latestLog != nil && meta != nil {
@@ -355,6 +360,15 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 		graph.ToEntity(timeline.RelIncludes, makeOwnerEntity(c.Owner))
 	}
 
+	// NOTE: For list-page “item-entities” display: the UI currently renders `includes`
+	// relations in item.js (detail page) but not in items.js (list page).
+	// If we ever want cache/owner to appear on the list page without touching items.js,
+	// we’d need to:
+	//   - either modify items.js to render rel.label == 'includes' (preferred),
+	//   - or (less ideal) emit synthetic items for cache/owner and link them,
+	//     which is discouraged because cache/owner are entities, not items.
+	//   - or change the backend to surface an “entity” field for the cache/owner,
+	//     but that would mix semantics with the owner/payload entity.
 	return graph
 }
 
