@@ -118,7 +118,7 @@ func (fi *FileImporter) FileImport(ctx context.Context, dirEntry timeline.DirEnt
 				return err
 			}
 
-			graph := waypointToGraph(w, owner)
+			graph := waypointToGraph(w, owner, fpath)
 			if graph != nil {
 				select {
 				case params.Pipeline <- graph:
@@ -216,7 +216,7 @@ func decodeGPX(r io.Reader) (*gpxFile, error) {
 	return &g, nil
 }
 
-func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
+func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph {
 	placedTs := parseTime(w.Time)
 	ts := placedTs
 
@@ -339,12 +339,14 @@ func waypointToGraph(w wpt, owner timeline.Entity) *timeline.Graph {
 	meta["Title"] = header
 
 	item := &timeline.Item{
-		ID:             w.Name,
-		Classification: timeline.ClassLocation,
-		Timestamp:      ts,
-		Location:       location,
-		Owner:          owner,
-		Metadata:       meta,
+		ID:                   w.Name,
+		Classification:       timeline.ClassLocation,
+		Timestamp:            ts,
+		Location:             location,
+		Owner:                owner,
+		Metadata:             meta,
+		OriginalLocation:     firstNonEmpty(w.URL, fpath),
+		IntermediateLocation: fpath,
 		Content: timeline.ItemData{
 			Data: timeline.StringData(contentText),
 		},
@@ -459,6 +461,15 @@ func makeCacheEntity(w wpt, c groundspeakCache) *timeline.Entity {
 		})
 	}
 	return ent
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func parseTime(val string) time.Time {
