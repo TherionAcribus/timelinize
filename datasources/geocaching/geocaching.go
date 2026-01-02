@@ -280,9 +280,6 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	if c.LongDesc.Text != "" {
 		meta["Long description"] = c.LongDesc.Text
 	}
-	if c.Attributes != nil {
-		meta["AttributesRaw"] = c.Attributes
-	}
 	if len(c.Attributes) > 0 {
 		attrs := make([]string, 0, len(c.Attributes))
 		for _, a := range c.Attributes {
