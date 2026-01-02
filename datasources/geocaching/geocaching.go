@@ -114,9 +114,17 @@ func (fi *FileImporter) FileImport(ctx context.Context, dirEntry timeline.DirEnt
 			default:
 			}
 
+			if err := params.Continue(); err != nil {
+				return err
+			}
+
 			graph := waypointToGraph(w, owner)
 			if graph != nil {
-				params.Pipeline <- graph
+				select {
+				case params.Pipeline <- graph:
+				case <-ctx.Done():
+					return ctx.Err()
+				}
 			}
 		}
 
