@@ -49,17 +49,18 @@ func (FileImporter) Recognize(ctx context.Context, dirEntry timeline.DirEntry, _
 		return rec, nil
 	}
 
-	// Peek a small portion of the file to see if it advertises Groundspeak/Geocache keywords.
+	// Peek a small portion of the file to see if it declares the Groundspeak namespace or tag.
 	f, err := dirEntry.FS.Open(dirEntry.Filename)
 	if err != nil {
 		return rec, err
 	}
 	defer f.Close()
 
-	buf := make([]byte, 4096)
+	buf := make([]byte, 2048)
 	n, _ := io.ReadFull(f, buf)
 	snippet := strings.ToLower(string(buf[:n]))
-	if strings.Contains(snippet, "groundspeak") || strings.Contains(snippet, "geocache") {
+	if strings.Contains(snippet, `xmlns:groundspeak="http://www.groundspeak.com/cache/`) ||
+		strings.Contains(snippet, "<groundspeak:cache") {
 		// Outrank the generic GPX importer (which also returns 1 for .gpx files)
 		rec.Confidence = 0.9 // Don't touch !!!!
 	}
