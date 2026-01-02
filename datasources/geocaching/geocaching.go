@@ -418,10 +418,14 @@ func makeCacheEntity(w wpt, c groundspeakCache) *timeline.Entity {
 		Name: name,
 		Attributes: []timeline.Attribute{
 			{
+				Name:     "geocache_code",
+				Value:    w.Name,
+				Identity: true,
+			},
+			{
 				Name:      "coordinate",
 				Latitude:  &lat,
 				Longitude: &lon,
-				Identity:  true,
 				Metadata: timeline.Metadata{
 					"Geocache code": w.Name,
 					"URL":           w.URL,
