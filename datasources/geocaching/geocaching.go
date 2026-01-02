@@ -73,6 +73,9 @@ func (fi *FileImporter) FileImport(ctx context.Context, dirEntry timeline.DirEnt
 	dsOpt := params.DataSourceOptions.(*Options)
 
 	owner := timeline.Entity{ID: dsOpt.OwnerEntityID}
+	if owner.ID == 0 {
+		return fmt.Errorf("geocaching: missing required OwnerEntityID option")
+	}
 
 	return fs.WalkDir(dirEntry.FS, dirEntry.Filename, func(fpath string, d fs.DirEntry, err error) error {
 		if err != nil {
