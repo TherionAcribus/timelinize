@@ -304,17 +304,28 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 				"Finder":    l.Finder.Name,
 				"Text":      l.Text.Body,
 			})
-			if latestLog == nil || parseTime(l.Date).After(parseTime(latestLog.Date)) {
-				latestLog = l
-			}
 		}
 		meta["Logs"] = logs
-	}
 
-	// Prefer the log date (found date) as the item timestamp; keep placed date in metadata.
-	if latestLog != nil {
-		if logTs := parseTime(latestLog.Date); !logTs.IsZero() {
-			ts = logTs
+		// Timestamp selection: prefer the user's (single) log; otherwise newest log; fallback to waypoint time.
+		switch len(c.Logs) {
+		case 1:
+			latestLog = &c.Logs[0]
+			if lt := parseTime(latestLog.Date); !lt.IsZero() {
+				ts = lt
+			}
+		default:
+			newest := ts
+			for i := range c.Logs {
+				l := &c.Logs[i]
+				if lt := parseTime(l.Date); !lt.IsZero() && (newest.IsZero() || lt.After(newest)) {
+					newest = lt
+					latestLog = l
+				}
+			}
+			if !newest.IsZero() {
+				ts = newest
+			}
 		}
 	}
 	if !placedTs.IsZero() {
