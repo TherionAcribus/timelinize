@@ -1,3 +1,6 @@
+// Import your finds from the geocaching.com website.
+// To retrieve your “finds” file, go to https://www.geocaching.com/pocket/default.aspx and select “My Finds” at the bottom of the page.
+
 package geocaching
 
 import (
