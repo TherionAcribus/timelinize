@@ -310,23 +310,28 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	}
 
 	var latestLog *gsLog
-	if len(c.Logs) > 0 {
-		logs := make([]map[string]any, 0, len(c.Logs))
+	switch len(c.Logs) {
+	case 1:
+		l := &c.Logs[0]
+		latestLog = l
+		meta["Log type"] = l.Type
+		meta["Log date"] = l.Date
+		if l.Finder.Name != "" {
+			meta["Log by"] = l.Finder.Name
+		}
+		if l.Text.Body != "" {
+			meta["Log text"] = l.Text.Body
+		}
+	case 0:
+		// nothing to surface
+	default:
 		for i := range c.Logs {
 			l := &c.Logs[i]
-			logs = append(logs, map[string]any{
-				"ID":        l.ID,
-				"Date":      l.Date,
-				"Type":      l.Type,
-				"Finder ID": l.Finder.ID,
-				"Finder":    l.Finder.Name,
-				"Text":      l.Text.Body,
-			})
 			if latestLog == nil || parseTime(l.Date).After(parseTime(latestLog.Date)) {
 				latestLog = l
 			}
 		}
-		meta["Logs"] = logs
+		meta["Log count"] = len(c.Logs)
 	}
 
 	// Keep placed date in metadata (ts already chosen above).
