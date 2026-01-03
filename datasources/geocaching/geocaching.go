@@ -258,9 +258,6 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	if w.URLName != "" {
 		meta["URL name"] = w.URLName
 	}
-	if w.Sym != "" {
-		meta["Symbol"] = w.Sym
-	}
 	if w.Type != "" {
 		meta["Type"] = w.Type
 	}
@@ -294,9 +291,6 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	}
 	if c.Owner.Name != "" {
 		meta["Owner name"] = c.Owner.Name
-	}
-	if c.Owner.ID != "" {
-		meta["Owner ID"] = c.Owner.ID
 	}
 	if c.ShortDesc.Text != "" {
 		meta["Short description"] = c.ShortDesc.Text
@@ -372,14 +366,6 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	cacheEntity := makeCacheEntity(w, c)
 	graph.ToEntity(timeline.RelVisit, cacheEntity)
 	graph.ToEntity(timeline.RelIncludes, cacheEntity)
-
-	// Surface latest log in metadata for quick UI access
-	if latestLog != nil && meta != nil {
-		meta["Latest log by"] = latestLog.Finder.Name
-		meta["Latest log type"] = latestLog.Type
-		meta["Latest log text"] = latestLog.Text.Body
-		meta["Latest log date"] = latestLog.Date
-	}
 
 	// Attach cache owner as an entity for browsing caches by owner
 	if c.Owner.Name != "" {
