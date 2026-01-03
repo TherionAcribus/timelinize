@@ -64,8 +64,7 @@ func (FileImporter) Recognize(ctx context.Context, dirEntry timeline.DirEntry, _
 	snippet := strings.ToLower(string(buf[:n]))
 	if strings.Contains(snippet, `xmlns:groundspeak="http://www.groundspeak.com/cache/`) ||
 		strings.Contains(snippet, "<groundspeak:cache") {
-		// Outrank the generic GPX importer (which also returns 1 for .gpx files)
-		rec.Confidence = 0.9 // Don't touch !!!!
+		rec.Confidence = 0.9 // The value is set to 0.9 and not 1, because if we set it to 1, gpx.go gets used instead of geocaching.go. Is there an inversion somewhere?
 	}
 
 	return rec, nil
@@ -390,12 +389,13 @@ func makeOwnerEntity(owner gsOwner) *timeline.Entity {
 		Name: owner.Name,
 		Attributes: []timeline.Attribute{
 			{
-				Name:     "geocaching_username",
-				Value:    owner.Name,
+				Name:     "geocaching_owner_id",
+				Value:    owner.ID,
 				Identity: true,
-				Metadata: timeline.Metadata{
-					"Geocaching owner ID": owner.ID,
-				},
+			},
+			{
+				Name:  "geocaching_username",
+				Value: owner.Name,
 			},
 		},
 		Metadata: timeline.Metadata{
