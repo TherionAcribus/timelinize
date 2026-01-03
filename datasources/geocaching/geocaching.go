@@ -157,7 +157,7 @@ type wpt struct {
 	Sym     string  `xml:"sym"`
 	Type    string  `xml:"type"`
 
-	Cache groundspeakCache `xml:"http://www.groundspeak.com/cache/1/0/1 cache"`
+	Cache groundspeakCache `xml:"cache"`
 }
 
 type groundspeakCache struct {
@@ -165,20 +165,20 @@ type groundspeakCache struct {
 	Archived  bool   `xml:"archived,attr"`
 	Available bool   `xml:"available,attr"`
 
-	Name       string   `xml:"http://www.groundspeak.com/cache/1/0/1 name"`
-	PlacedBy   string   `xml:"http://www.groundspeak.com/cache/1/0/1 placed_by"`
-	Owner      gsOwner  `xml:"http://www.groundspeak.com/cache/1/0/1 owner"`
-	Type       string   `xml:"http://www.groundspeak.com/cache/1/0/1 type"`
-	Container  string   `xml:"http://www.groundspeak.com/cache/1/0/1 container"`
-	Attributes []gsAttr `xml:"http://www.groundspeak.com/cache/1/0/1 attributes>attribute"`
-	Difficulty float64  `xml:"http://www.groundspeak.com/cache/1/0/1 difficulty"`
-	Terrain    float64  `xml:"http://www.groundspeak.com/cache/1/0/1 terrain"`
-	Country    string   `xml:"http://www.groundspeak.com/cache/1/0/1 country"`
-	State      string   `xml:"http://www.groundspeak.com/cache/1/0/1 state"`
-	ShortDesc  gsText   `xml:"http://www.groundspeak.com/cache/1/0/1 short_description"`
-	LongDesc   gsText   `xml:"http://www.groundspeak.com/cache/1/0/1 long_description"`
-	Hints      string   `xml:"http://www.groundspeak.com/cache/1/0/1 encoded_hints"`
-	Logs       []gsLog  `xml:"http://www.groundspeak.com/cache/1/0/1 logs>log"`
+	Name       string   `xml:"name"`
+	PlacedBy   string   `xml:"placed_by"`
+	Owner      gsOwner  `xml:"owner"`
+	Type       string   `xml:"type"`
+	Container  string   `xml:"container"`
+	Attributes []gsAttr `xml:"attributes>attribute"`
+	Difficulty float64  `xml:"difficulty"`
+	Terrain    float64  `xml:"terrain"`
+	Country    string   `xml:"country"`
+	State      string   `xml:"state"`
+	ShortDesc  gsText   `xml:"short_description"`
+	LongDesc   gsText   `xml:"long_description"`
+	Hints      string   `xml:"encoded_hints"`
+	Logs       []gsLog  `xml:"logs>log"`
 }
 
 type gsOwner struct {
