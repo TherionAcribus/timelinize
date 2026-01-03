@@ -317,14 +317,6 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	case 1:
 		l := &c.Logs[0]
 		latestLog = l
-		meta["Log type"] = l.Type
-		meta["Log date"] = l.Date
-		if l.Finder.Name != "" {
-			meta["Log by"] = l.Finder.Name
-		}
-		if l.Text.Body != "" {
-			meta["Log text"] = l.Text.Body
-		}
 	case 0:
 		// nothing to surface
 	default:
