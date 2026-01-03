@@ -225,15 +225,15 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 	// - If exactly one log is present, use it as the event timestamp.
 	// - If multiple logs, take the newest.
 	// - If no logs or parse failure, fallback to waypoint time.
-	placedTs := parseTime(w.Time)
-	ts := placedTs
+	placedDay, placedDayStr := parseGPXDay(w.Time)
+	ts := placedDay
 	switch len(w.Cache.Logs) {
 	case 1:
 		if lt := parseTime(w.Cache.Logs[0].Date); !lt.IsZero() {
 			ts = lt
 		}
 	case 0:
-		// keep waypoint time
+		// keep waypoint day
 	default:
 		newest := ts
 		for _, l := range w.Cache.Logs {
@@ -329,9 +329,11 @@ func waypointToGraph(w wpt, owner timeline.Entity, fpath string) *timeline.Graph
 		meta["Log count"] = len(c.Logs)
 	}
 
-	// Keep placed date in metadata (ts already chosen above).
-	if !placedTs.IsZero() {
-		meta["Cache placed date"] = placedTs
+	// wpt/time is treated as a day (publication/placed date), stored as YYYY-MM-DD to avoid timezone/display issues.
+	if placedDayStr != "" {
+		meta["Cache placed date"] = placedDayStr
+	} else if strings.TrimSpace(w.Time) != "" {
+		meta["Cache placed date (raw)"] = w.Time
 	}
 
 	// Choose visible content
@@ -503,4 +505,28 @@ func parseTime(val string) time.Time {
 		}
 	}
 	return time.Time{}
+}
+
+// parseGPXDay parses a GPX day value and returns both a normalized time.Time at
+// midnight UTC and a stable YYYY-MM-DD string. Falls back to zero values on failure.
+func parseGPXDay(val string) (time.Time, string) {
+	val = strings.TrimSpace(val)
+	if val == "" {
+		return time.Time{}, ""
+	}
+
+	layouts := []string{
+		time.RFC3339Nano,
+		time.RFC3339,
+		"2006-01-02T15:04:05",
+		"2006-01-02",
+	}
+	for _, l := range layouts {
+		if t, err := time.Parse(l, val); err == nil {
+			y, m, d := t.Date()
+			day := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+			return day, fmt.Sprintf("%04d-%02d-%02d", y, int(m), d)
+		}
+	}
+	return time.Time{}, ""
 }
